@@ -117,19 +117,19 @@ class SpeedMonitor:
 
 
 class WeightedMSELoss(nn.Module):
-    def __init__(self, size_average=True):
+    def __init__(self, reduction='mean'):
         super(WeightedMSELoss, self).__init__()
-        self.size_average = size_average
+        self.reduction = reduction
 
     def forward(self, input, target, weights=None):
         if weights is None:
-            return nn.MSELoss(self.size_average)(input, target)
+            return nn.MSELoss(reduction=self.reduction)(input, target)
 
         loss_rows = (input - target) ** 2
         if len(loss_rows.size()) != 1:
             loss_rows = torch.sum(loss_rows, dim=1)
         res = (weights * loss_rows).sum()
-        if self.size_average:
+        if self.reduction == "mean":
             res /= len(weights)
         return res
 

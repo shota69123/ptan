@@ -1,5 +1,5 @@
 import unittest
-import gym
+import gymnasium as gym
 import numpy as np
 from ptan.common import wrappers_simple
 
@@ -26,8 +26,8 @@ class TestFrameStack1D(unittest.TestCase):
         self.assertIsInstance(e.action_space, gym.spaces.Discrete)
 
         self.assertIsInstance(e.observation_space, gym.spaces.Box)
-        self.assertEquals(e.observation_space.shape, (3, ))
-        self.assertEquals(e.observation_space.dtype, np.float32)
+        self.assertEqual(e.observation_space.shape, (3, ))
+        self.assertEqual(e.observation_space.dtype, np.float32)
 
         with self.assertRaises(AssertionError):
             e = SimpleEnv(obs_shape=(2,2), obs_low=-np.inf, obs_high=np.inf)

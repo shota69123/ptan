@@ -102,25 +102,25 @@ class TestWeightedMSELoss(TestCase):
         return loss(input_v, target_v, weights_v).data.numpy()
 
     def test_no_weights(self):
-        loss = WeightedMSELoss(size_average=False)
+        loss = WeightedMSELoss(reduction='sum')
 
         np.testing.assert_almost_equal(self.get_loss(loss, [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]), [0.0])
         np.testing.assert_almost_equal(self.get_loss(loss, [1.0, 1.0, 1.0], [0.0, 2.0, 0.0]), [3.0])
         np.testing.assert_almost_equal(self.get_loss(loss, [1.0, 1.0, 1.0], [1.0, 5.0, 1.0]), [16.0])
 
-        loss = WeightedMSELoss(size_average=True)
+        loss = WeightedMSELoss(reduction='mean')
         np.testing.assert_almost_equal(self.get_loss(loss, [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]), [0.0])
         np.testing.assert_almost_equal(self.get_loss(loss, [1.0, 1.0, 1.0], [0.0, 2.0, 0.0]), [1.0])
         np.testing.assert_almost_equal(self.get_loss(loss, [1.0, 1.0, 1.0], [1.0, 5.0, 1.0]), [16.0/3])
 
     def test_weights(self):
-        loss = WeightedMSELoss(size_average=False)
+        loss = WeightedMSELoss(reduction='sum')
 
         np.testing.assert_almost_equal(self.get_loss(loss, [1.0, 1.0, 1.0], [0.0, 2.0, 0.0], [1.0, 3.0, 2.0]), [6.0])
         np.testing.assert_almost_equal(self.get_loss(loss, [1.0, 1.0, 1.0], [1.0, 5.0, 1.0], [1.0, 1.0/4, 1.0]), [4.0])
 
 
-class TestTBWriter:
+class TBWriterForTest:
     def __init__(self):
         self.closed = False
         self.buffer = []
@@ -139,26 +139,26 @@ class TestTBWriter:
 
 class TestTBMeanTracker(TestCase):
     def test_simple(self):
-        writer = TestTBWriter()
+        writer = TBWriterForTest()
         with TBMeanTracker(writer, batch_size=4) as tracker:
             tracker.track("param_1", value=10, iter_index=1)
-            self.assertEquals(writer.buffer, [])
+            self.assertEqual(writer.buffer, [])
             tracker.track("param_1", value=10, iter_index=2)
-            self.assertEquals(writer.buffer, [])
+            self.assertEqual(writer.buffer, [])
             tracker.track("param_1", value=10, iter_index=3)
-            self.assertEquals(writer.buffer, [])
+            self.assertEqual(writer.buffer, [])
             tracker.track("param_1", value=10, iter_index=4)
-            self.assertEquals(writer.buffer, [("param_1", 10.0, 4)])
+            self.assertEqual(writer.buffer, [("param_1", 10.0, 4)])
             writer.reset()
 
             tracker.track("param_1", value=1.0, iter_index=1)
-            self.assertEquals(writer.buffer, [])
+            self.assertEqual(writer.buffer, [])
             tracker.track("param_1", value=2.0, iter_index=2)
-            self.assertEquals(writer.buffer, [])
+            self.assertEqual(writer.buffer, [])
             tracker.track("param_1", value=-3.0, iter_index=3)
-            self.assertEquals(writer.buffer, [])
+            self.assertEqual(writer.buffer, [])
             tracker.track("param_1", value=1.0, iter_index=4)
-            self.assertEquals(writer.buffer, [("param_1", (1.0 + 2.0 - 3.0 + 1.0) / 4, 4)])
+            self.assertEqual(writer.buffer, [("param_1", (1.0 + 2.0 - 3.0 + 1.0) / 4, 4)])
             writer.reset()
 
 
@@ -167,22 +167,22 @@ class TestTBMeanTracker(TestCase):
         self.assertTrue(writer.closed)
 
     def test_tensor(self):
-        writer = TestTBWriter()
+        writer = TBWriterForTest()
 
         with TBMeanTracker(writer, batch_size=2) as tracker:
             t = torch.LongTensor([1])
             tracker.track("p1", t, iter_index=1)
             tracker.track("p1", t, iter_index=2)
-            self.assertEquals(writer.buffer, [("p1", 1.0, 2)])
+            self.assertEqual(writer.buffer, [("p1", 1.0, 2)])
 
     def test_tensor_large(self):
-        writer = TestTBWriter()
+        writer = TBWriterForTest()
 
         with TBMeanTracker(writer, batch_size=2) as tracker:
             t = torch.LongTensor([1, 2, 3])
             tracker.track("p1", t, iter_index=1)
             tracker.track("p1", t, iter_index=2)
-            self.assertEquals(writer.buffer, [("p1", 2.0, 2)])
+            self.assertEqual(writer.buffer, [("p1", 2.0, 2)])
 
     def test_as_float(self):
         self.assertAlmostEqual(1.0, TBMeanTracker._as_float(1.0))

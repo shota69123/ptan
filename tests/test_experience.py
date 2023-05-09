@@ -1,7 +1,7 @@
 import numpy as np
 from unittest import TestCase
 
-import gym
+import gymnasium as gym
 from ptan import experience, agent
 
 
@@ -23,13 +23,13 @@ class CountingEnv(gym.Env):
 
     def reset(self):
         self.state = 0
-        return self.state
+        return self.state, {}
 
     def step(self, action):
         self.state += 1
         done = self.state == self.limit-1
         reward = self.state
-        return self.state, reward, done, {}
+        return self.state, reward, done, {}, {}
 
 
 class TestExperienceSourceSingleEnv(TestCase):
@@ -54,7 +54,7 @@ class TestExperienceSourceSingleEnv(TestCase):
             break
 
     def test_short_game(self):
-        env = gym.make('CartPole-v0')
+        env = gym.make('CartPole-v1')
         exp_source = experience.ExperienceSource(env, DummyAgent(), steps_count=1)
         for step, exp in enumerate(exp_source):
             self.assertIsInstance(exp, tuple)
@@ -92,7 +92,7 @@ class StatefulAgent(agent.BaseAgent):
 class TestExperienceSourceStateful(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.envs = [gym.make("CartPole-v0") for _ in range(2)]
+        cls.envs = [gym.make("CartPole-v1") for _ in range(2)]
 
     def test_state(self):
         actions_count = self.envs[0].action_space.n
@@ -162,5 +162,4 @@ class TestExperienceSourceFirstLast(TestCase):
             if idx > 5:
                 break
         # NB: there is no last state(4), as we don't record it
-        self.assertEquals(states, [0, 1, 2, 3, 0, 1, 2])
-
+        self.assertEqual(states, [0, 1, 2, 3, 0, 1, 2])
