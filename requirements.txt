@@ -1,7 +1,7 @@
 numpy
 opencv-python
-gymnasium[all]==0.28.1
+gymnasium[all]
 atari-py
 nose
-torch==2.0.0
+torch
 torch-ignite
