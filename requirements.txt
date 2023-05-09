@@ -1,6 +1,6 @@
 numpy
 opencv-python
-gymnasium[all]
+gymnasium[all, accept-rom-license]
 atari-py
 nose
 torch
