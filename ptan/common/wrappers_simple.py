@@ -23,8 +23,8 @@ class FrameStack1D(gym.Wrapper):
                                                 shape=(env.observation_space.shape[0]*k,),
                                                 dtype=env.observation_space.dtype)
 
-    def reset(self):
-        ob = self.env.reset()
+    def reset(self, **kwargs):
+        ob = self.env.reset(**kwargs)
         for _ in range(self.k):
             self.frames.append(ob)
         return self._get_ob()

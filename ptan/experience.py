@@ -91,7 +91,6 @@ class ExperienceSource:
                 if self.vectorized:
                     next_state_n, r_n, is_done_n, _, _ = env.step(action_n)
                 else:
-                    print(env)
                     next_state, r, is_done, _, _ = env.step(action_n[0])
                     next_state_n, r_n, is_done_n = [next_state], [r], [is_done]
 
